@@ -18,13 +18,14 @@ export default function Login() {
 
     const logar = async()=> {
 
-        let r = await api.login(usuario, senha);
-        if(r.erro) {
-            alert(`${r.erro}`)
+        let resp = await api.login(usuario, senha);
+        if(resp.erro) {
+            alert(`${resp.erro}`)
         } else {
-            Cookies.set('usuario-logado', true)
-            navegation.push('/chat')
+            Cookies.set('usuario-logado', JSON.stringify(resp));
+            navegation.push('/chat');
         }
+
     }
 
     return (

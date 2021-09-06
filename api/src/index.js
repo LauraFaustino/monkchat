@@ -11,17 +11,19 @@ app.post('/login', async (req,resp) => {
     const login = req.body;
     const cryptoSenha = crypto.SHA256(login.senha).toString(crypto.enc.Base64);
 
-    let r = await db.tb_usuario.findOne({
+    let u = await db.tb_usuario.findOne({
             where: {
                 ds_login: login.usuario, 
                 ds_senha: cryptoSenha 
-            }
+            },
+            raw: true
         });
 
-        if(r == null)
-            return resp.send({erro: 'Credenciais inválidas'})
+        if (u == null)
+            return resp.send({ erro: 'Credenciais inválidas!' });
 
-        resp.sendStatus(200);
+        delete u.ds_senha;
+        resp.send(u);
 });
 
 
@@ -137,6 +139,35 @@ app.get('/chat/:sala', async (req, resp) => {
 })
 
 
+
+app.delete('/chat/:id', async (req, resp) => {
+    try {
+        let r = await db.tb_chat.destroy({ where: {id_chat: req.params.id}})
+        resp.sendStatus(200);
+
+    } catch (e) {
+        resp.send({ erro: e.toString() })
+    }
+})
+
+app.put('/chat/:id', async(req, resp) => {
+    try{
+        let id = req.params.id;
+        let mensagem = req.body.mensagem;
+
+        let r = await db.tb_chat.update(
+            {
+                ds_mensagem: mensagem
+            },
+            {
+                where: {id_chat: id}
+            }); 
+
+        resp.sendStatus(200);
+        } catch (e) {
+            resp.send({ erro: e.toString() });
+        }
+})
 
 app.listen(process.env.PORT,
            x => console.log(`>> Server up at port ${process.env.PORT}`))
